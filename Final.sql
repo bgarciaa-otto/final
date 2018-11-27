@@ -5,29 +5,80 @@
 
 --For example, array = [1,2,3,4,5,6] and k = 5. Our three pairs meeting the criteria are [1,4], [2,3] and [4,6].
 
---Function description
-
---Execute this:
-
-CREATE TYPE number_array AS VARRAY(100) OF INTEGER;
-
 declare
    array number_array := number_array(1,2,3,4,5,6);
    k integer := 5;
 begin
     for i in 1..array.count loop
         for j in 1..array.count loop
-            if ((i < j) and (MOD(array(i) + array(j), k) = 0)) then
+            if ((i < j) and (mod(array(i) + array(j), k) = 0)) then
                 dbms_output.put_line('['||array(i)||','||array(j)||']');
             end if;
         end loop;
     end loop;
 end;
 
+--Function description
+
+--Execute this:
+
+CREATE TYPE number_array AS VARRAY(100) OF INTEGER;
+
 --You will write a function called "divisible_sum_pairs", it should return the integer count of pairs meeting the criteria. The parameters are:
 
 --* 1 <= k <= 100
 --* 1 <= ar[i] <= 100
+
+CREATE OR REPLACE FUNCTION divisible_sum_pairs(array in number_array, k in integer) 
+return integer is
+aux integer;
+length_ERROR EXCEPTION;
+array_ERROR EXCEPTION;
+BEGIN
+
+    aux := 0;
+
+    if k < 1 and k > 100 then
+        RAISE length_ERROR;
+    end if;
+    
+     for i in 1..array.count loop
+        if array(i) < 1 and array(i) > 100 then
+            RAISE array_ERROR;
+        end if;
+        for j in 1..array.count loop
+            if ((i < j) and (mod(array(i) + array(j), k) = 0)) then
+                aux := aux+1;
+                --dbms_output.put_line('['||array(i)||','||array(j)||']');
+            end if;
+        end loop;
+        
+    end loop;
+    
+    return aux;
+    
+    EXCEPTION  
+    WHEN length_ERROR THEN 
+        dbms_output.put_line('The value of k doesnt meet the criteria 1 <= k <= 100');
+        RETURN -1;
+    WHEN array_ERROR THEN
+        dbms_output.put_line('The length of the array doesnt meet the criteria 1 <= ar[i] <= 100');
+        RETURN -1;
+
+END;
+
+DECLARE
+result integer;
+k integer := 3;
+array  number_array := number_array(1,3,2,6,1,2);
+
+BEGIN
+   
+    result:=divisible_sum_pairs(array,k);
+    dbms_output.put_line(result);
+
+END;
+
 
 --You should raise exceptions if:
 
